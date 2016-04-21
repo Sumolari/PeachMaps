@@ -12,7 +12,7 @@ This project uses [less](http://lesscss.org/) and [CoffeeScript](http://coffeesc
 
 # What to do next
 
-[X] Search engine
-[ ] Directions
-[ ] Multiple annotations / custom maps
-[ ] Windowed application with Electron or similar
+- [x] Search engine
+- [ ] Directions
+- [ ] Multiple annotations / custom maps
+- [ ] Windowed application with Electron or similar
