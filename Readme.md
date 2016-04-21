@@ -1,3 +1,5 @@
+Check out the [demo](https://sumolari.github.io/PeachMaps/)!
+
 # How it works
 
 Peach Maps includes Apple Maps files from Apple's CDN and loads a [bootstrap.json script](https://github.com/Sumolari/PeachMaps/blob/gh-pages/bootstrap.json) locally hosted to prevent 4XX errors.
