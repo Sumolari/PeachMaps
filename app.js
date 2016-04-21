@@ -50,7 +50,7 @@
         }
         current_annotation = new mapkit.ImageAnnotation(new mapkit.Coordinate(target.latitude, target.longitude), annotation_data);
         map.addAnnotation(current_annotation);
-        exportURL = "./?lat=" + target.latitude + "&lon=" + target.longitude + "&title=" + (encodeURIComponent(target.title)) + "&subtitle=" + (encodeURIComponent(target.subtitle));
+        exportURL = "?lat=" + target.latitude + "&lon=" + target.longitude + "&title=" + (encodeURIComponent(target.title)) + "&subtitle=" + (encodeURIComponent(target.subtitle));
         permalink.attr('href', exportURL);
         return permalink.show();
       };
