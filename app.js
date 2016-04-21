@@ -84,7 +84,7 @@
           clearTimeout(pending_update);
         }
         return last_query = $.ajax({
-          url: "http://nominatim.openstreetmap.org/search",
+          url: "https://nominatim.openstreetmap.org/search",
           jsonp: "json_callback",
           dataType: "jsonp",
           data: {

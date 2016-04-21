@@ -98,7 +98,7 @@ document.addEventListener 'DOMContentLoaded', (event) ->
       clearTimeout pending_update if pending_update?
 
       last_query = $.ajax
-        url: "http://nominatim.openstreetmap.org/search",
+        url: "https://nominatim.openstreetmap.org/search",
         jsonp: "json_callback",
         dataType: "jsonp",
         data: {
