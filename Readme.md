@@ -15,6 +15,8 @@ This project uses [less](http://lesscss.org/) and [CoffeeScript](http://coffeesc
 - [x] Search engine (OpenStreetMap) (check it out at commit [fa6f276](https://github.com/Sumolari/PeachMaps/commit/fa6f276ddff418bd477a36379d4d148401fb1b40))
 - [x] Use MapKit's search engine
 - [x] Search suggestions
+- [x] Highlight query in suggestions
+- [x] Activity indicator
 - [ ] Directions
 - [ ] Multiple annotations / custom maps
 - [ ] Windowed application with Electron or similar

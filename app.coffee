@@ -93,13 +93,28 @@ document.addEventListener 'DOMContentLoaded', (event) ->
 
       permalink.hide()
 
-    hide_suggestions = $ '#hide-suggestions'
+    hide_suggestions_button = $ '#hide-suggestions'
     search_suggestions = $ '#search-suggestions'
     search_suggestions_ul = $ '#search-suggestions ul'
+    activity_indicator = $ '#activity_indicator'
+
+    hide_suggestions = ->
+      hide_suggestions_button.hide()
+      search_suggestions.hide()
+
+    show_suggestions = ->
+      hide_suggestions_button.show()
+      search_suggestions.show()
 
     search = ( search_term ) ->
       clearTimeout pending_update if pending_update?
+
+      hide_suggestions()
+      activity_indicator.show()
+
       search_engine.autocomplete search_term, ( err, res ) ->
+        activity_indicator.hide()
+
         if res && res.results
           items = []
           for item in res.results
@@ -113,8 +128,7 @@ document.addEventListener 'DOMContentLoaded', (event) ->
           if items.length > 0
             pending_update = setTimeout ->
 
-              search_suggestions.show()
-              hide_suggestions.show()
+              show_suggestions()
 
               search_suggestions_ul.html ''
               for item in items
@@ -140,12 +154,9 @@ document.addEventListener 'DOMContentLoaded', (event) ->
     search_field = $ '#search'
     search_form = $ '#search-form'
 
-    hide_suggestions.on 'click', ( e ) ->
+    hide_suggestions_button.on 'click', ( e ) ->
       e.preventDefault
-
-      hide_suggestions.hide()
-      search_suggestions.hide()
-
+      hide_suggestions()
       return false
 
     search_suggestions.on 'click', 'a[data-latitude]', ( e ) ->

@@ -1,3 +1,5 @@
+@import 'loaders.less';
+
 @orange: #FF7D00;
 @darkGrey: #494949;
 @lightGrey: #7C7C7C;
@@ -73,6 +75,16 @@ body {
 
 			}
 
+			#activity_indicator[data-loader='circle'] {
+				display: none;
+				position: absolute;
+				top: 1px;
+				right: -20px;
+				z-index: 999;
+				border: 1px solid @orange;
+				border-top-color: transparent;
+			}
+
 			#hide-suggestions {
 
 			    top: 10px;
@@ -108,24 +120,6 @@ body {
 				background: rgba(255,255,255,0.9);
 				box-shadow: 0px 0px 15px rgba(0,0,0,0.15), 0px 0px 1px 1px rgba(0,0,0,0.1);
 				border-radius: 0 0 5px 5px;
-
-				&:before, &:after {
-					content: '';
-					display: block;
-					padding: 0 30px;
-					width: 100%;
-					background: @orange;
-					height: 1px;
-					position: absolute;
-					z-index: 99;
-					top: -1px;
-					left: -15px;
-				}
-
-				&:before {
-					top: -2px;
-					background: #fff;
-				}
 
 				ul {
 

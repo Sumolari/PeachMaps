@@ -27,7 +27,7 @@
     pending_update = null;
     search_engine = new mapkit.Search();
     return $('document').ready(function() {
-      var focusTarget, hide_suggestions, initialTarget, permalink, search, search_field, search_form, search_suggestions, search_suggestions_ul;
+      var activity_indicator, focusTarget, hide_suggestions, hide_suggestions_button, initialTarget, permalink, search, search_field, search_form, search_suggestions, search_suggestions_ul, show_suggestions;
       permalink = $('#permalink');
       focusTarget = function(target) {
         var annotation_data, exportURL;
@@ -76,15 +76,27 @@
         focusTarget(initialTarget);
         permalink.hide();
       }
-      hide_suggestions = $('#hide-suggestions');
+      hide_suggestions_button = $('#hide-suggestions');
       search_suggestions = $('#search-suggestions');
       search_suggestions_ul = $('#search-suggestions ul');
+      activity_indicator = $('#activity_indicator');
+      hide_suggestions = function() {
+        hide_suggestions_button.hide();
+        return search_suggestions.hide();
+      };
+      show_suggestions = function() {
+        hide_suggestions_button.show();
+        return search_suggestions.show();
+      };
       search = function(search_term) {
         if (pending_update != null) {
           clearTimeout(pending_update);
         }
+        hide_suggestions();
+        activity_indicator.show();
         return search_engine.autocomplete(search_term, function(err, res) {
           var i, item, items, len, ref, ref1, ref2;
+          activity_indicator.hide();
           if (res && res.results) {
             items = [];
             ref = res.results;
@@ -102,8 +114,7 @@
             if (items.length > 0) {
               return pending_update = setTimeout(function() {
                 var findRegex, highlighted_title, j, len1, replace;
-                search_suggestions.show();
-                hide_suggestions.show();
+                show_suggestions();
                 search_suggestions_ul.html('');
                 for (j = 0, len1 = items.length; j < len1; j++) {
                   item = items[j];
@@ -120,10 +131,9 @@
       };
       search_field = $('#search');
       search_form = $('#search-form');
-      hide_suggestions.on('click', function(e) {
+      hide_suggestions_button.on('click', function(e) {
         e.preventDefault;
-        hide_suggestions.hide();
-        search_suggestions.hide();
+        hide_suggestions();
         return false;
       });
       search_suggestions.on('click', 'a[data-latitude]', function(e) {
