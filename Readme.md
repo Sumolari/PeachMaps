@@ -6,7 +6,7 @@ Peach Maps includes Apple Maps files from Apple's CDN and loads a [bootstrap.jso
 
 MapKit offers an API to show popovers and add annotations.
 
-Search results are currently powered by [OpenStreetMaps](https://www.openstreetmap.org/) which is queried directly from your browser via its JSONP API so you can run this project using a simple static file server and no extra dependencies.
+Search results are currently powered by [OpenStreetMap](https://www.openstreetmap.org/) which is queried directly from your browser via its JSONP API so you can run this project using a simple static file server and no extra dependencies.
 
 # How it is built
 
@@ -14,7 +14,8 @@ This project uses [less](http://lesscss.org/) and [CoffeeScript](http://coffeesc
 
 # What to do next
 
-- [x] Search engine
+- [x] Search engine (OpenStreetMap)
+- [ ] Use MapKit's search engine
 - [ ] Directions
 - [ ] Multiple annotations / custom maps
 - [ ] Windowed application with Electron or similar
