@@ -118,13 +118,19 @@ document.addEventListener 'DOMContentLoaded', (event) ->
 
               search_suggestions_ul.html ''
               for item in items
+
+                findRegex = new RegExp "(#{search_term})", 'i'
+                replace = '<strong>$1</strong>'
+
+                highlighted_title = item.title.replace findRegex, replace
+
                 search_suggestions_ul.append "\
                   <li><a href=\"\#\"\
                          data-latitude=\"#{item.latitude}\"
                          data-longitude=\"#{item.longitude}\"
                          data-title=\"#{item.title}\"
                          data-subtitle=\"#{item.subtitle}\">\
-                           <span class=\"title\">#{item.title}</span>\
+                           <span class=\"title\">#{highlighted_title}</span>\
                            <span class=\"subtitle\">#{item.subtitle}</span>\
                       </a></li>"
 

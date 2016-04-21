@@ -101,13 +101,16 @@
             }
             if (items.length > 0) {
               return pending_update = setTimeout(function() {
-                var j, len1;
+                var findRegex, highlighted_title, j, len1, replace;
                 search_suggestions.show();
                 hide_suggestions.show();
                 search_suggestions_ul.html('');
                 for (j = 0, len1 = items.length; j < len1; j++) {
                   item = items[j];
-                  search_suggestions_ul.append("<li><a href=\"\#\"data-latitude=\"" + item.latitude + "\" data-longitude=\"" + item.longitude + "\" data-title=\"" + item.title + "\" data-subtitle=\"" + item.subtitle + "\"><span class=\"title\">" + item.title + "</span><span class=\"subtitle\">" + item.subtitle + "</span></a></li>");
+                  findRegex = new RegExp("(" + search_term + ")", 'i');
+                  replace = '<strong>$1</strong>';
+                  highlighted_title = item.title.replace(findRegex, replace);
+                  search_suggestions_ul.append("<li><a href=\"\#\"data-latitude=\"" + item.latitude + "\" data-longitude=\"" + item.longitude + "\" data-title=\"" + item.title + "\" data-subtitle=\"" + item.subtitle + "\"><span class=\"title\">" + highlighted_title + "</span><span class=\"subtitle\">" + item.subtitle + "</span></a></li>");
                 }
                 return focusTarget(items[0]);
               }, 200);
