@@ -1,3 +1,19 @@
+QueryString = ( ->
+  query_string = {}
+  query = window.location.search.substring 1
+  vars = query.split '&'
+  for item in vars
+    pair = item.split '='
+    if typeof query_string[ pair[ 0 ] ] is 'undefined'
+      query_string[ pair[ 0 ] ] = decodeURIComponent pair[ 1 ]
+    else if typeof query_string[ pair[ 0 ] ] is 'string'
+      arr = [ query_string[ pair[ 0 ] ], decodeURIComponent pair[ 1 ] ]
+      query_string[ pair[ 0 ] ] = arr
+    else
+      query_string[ pair[ 0 ] ].push decodeURIComponent pair[ 1 ]
+  return query_string
+)()
+
 document.addEventListener 'DOMContentLoaded', (event) ->
 
   mapkit.init
@@ -51,8 +67,8 @@ document.addEventListener 'DOMContentLoaded', (event) ->
         title: target.title
         subtitle: target.subtitle
         url:
-          1: "greenDot.png",
-          2: "greenDot@2x.png"
+          1: "assets/greenDot.png",
+          2: "assets/greenDot@2x.png"
 
       map.removeAnnotation current_annotation if current_annotation?
 
