@@ -27,7 +27,7 @@
     last_query = null;
     pending_update = null;
     return $('document').ready(function() {
-      var focusTarget, initialTarget, permalink;
+      var focusTarget, initialTarget, permalink, search, search_field, search_form;
       permalink = $('#permalink');
       focusTarget = function(target) {
         var annotation_data, exportURL;
@@ -76,9 +76,7 @@
         focusTarget(initialTarget);
         permalink.hide();
       }
-      return $('#search').on('input', function() {
-        var search_term;
-        search_term = $(this).val();
+      search = function(search_term) {
         if (last_query != null) {
           last_query.abort();
         }
@@ -116,6 +114,16 @@
             }, 200);
           }
         });
+      };
+      search_field = $('#search');
+      search_form = $('#search-form');
+      search_form.on('submit', function(e) {
+        e.preventDefault();
+        search(search_field.val());
+        return false;
+      });
+      return search_field.on('input', function() {
+        return search(search_field.val());
       });
     });
   });

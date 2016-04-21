@@ -93,9 +93,7 @@ document.addEventListener 'DOMContentLoaded', (event) ->
 
       permalink.hide()
 
-    $( '#search' ).on 'input', ->
-      search_term = $( this ).val()
-
+    search = ( search_term ) ->
       last_query?.abort()
       clearTimeout pending_update if pending_update?
 
@@ -131,3 +129,14 @@ document.addEventListener 'DOMContentLoaded', (event) ->
             focusTarget data
 
           , 200
+
+    search_field = $( '#search' )
+    search_form = $( '#search-form' )
+
+    search_form.on 'submit', ( e ) ->
+      e.preventDefault()
+      search search_field.val()
+      return false
+
+    search_field.on 'input', ->
+      search search_field.val()
