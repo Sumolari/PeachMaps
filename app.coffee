@@ -24,9 +24,9 @@ document.addEventListener 'DOMContentLoaded', (event) ->
       return element
 
   current_annotation = null
-
-  last_query = null
   pending_update = null
+
+  search_engine = new mapkit.Search()
 
   $( 'document' ).ready ->
 
@@ -93,45 +93,69 @@ document.addEventListener 'DOMContentLoaded', (event) ->
 
       permalink.hide()
 
+    hide_suggestions = $ '#hide-suggestions'
+    search_suggestions = $ '#search-suggestions'
+    search_suggestions_ul = $ '#search-suggestions ul'
+
     search = ( search_term ) ->
-      last_query?.abort()
       clearTimeout pending_update if pending_update?
+      search_engine.autocomplete search_term, ( err, res ) ->
+        if res && res.results
+          items = []
+          for item in res.results
+            if item.coordinate && item.displayLines
+              items.push
+                latitude: item.coordinate.latitude
+                longitude: item.coordinate.longitude
+                title: item.displayLines[0] ? ''
+                subtitle: item.displayLines[1] ? ''
 
-      last_query = $.ajax
-        url: "https://nominatim.openstreetmap.org/search",
-        jsonp: "json_callback",
-        dataType: "jsonp",
-        data: {
-          q: search_term,
-          format: 'json',
-          limit: 1
-        },
-        success: ( response ) ->
+          if items.length > 0
+            pending_update = setTimeout ->
 
-          pending_update = setTimeout ->
+              search_suggestions.show()
+              hide_suggestions.show()
 
-            return unless response[0]?
+              search_suggestions_ul.html ''
+              for item in items
+                search_suggestions_ul.append "\
+                  <li><a href=\"\#\"\
+                         data-latitude=\"#{item.latitude}\"
+                         data-longitude=\"#{item.longitude}\"
+                         data-title=\"#{item.title}\"
+                         data-subtitle=\"#{item.subtitle}\">\
+                           <span class=\"title\">#{item.title}</span>\
+                           <span class=\"subtitle\">#{item.subtitle}</span>\
+                      </a></li>"
 
-            latitude = parseFloat response[0].lat
-            longitude = parseFloat response[0].lon
+              focusTarget items[0]
+            , 200
 
-            display_name = response[0].display_name
-            comma_position = display_name.indexOf ','
-            before_first_comma = display_name.substring 0, comma_position
-            after_first_comma = display_name.substring comma_position + 1
+    search_field = $ '#search'
+    search_form = $ '#search-form'
 
-            data =
-              title: before_first_comma
-              subtitle: after_first_comma
-              latitude: latitude
-              longitude: longitude
+    hide_suggestions.on 'click', ( e ) ->
+      e.preventDefault
 
-            focusTarget data
+      hide_suggestions.hide()
+      search_suggestions.hide()
 
-          , 200
+      return false
 
-    search_field = $( '#search' )
-    search_form = $( '#search-form' )
+    search_suggestions.on 'click', 'a[data-latitude]', ( e ) ->
+      e.preventDefault()
+
+      link = $ this
+
+      target =
+        latitude: parseFloat link.attr 'data-latitude'
+        longitude: parseFloat link.attr 'data-longitude'
+        title: link.attr 'data-title'
+        subtitle: link.attr 'data-subtitle'
+
+      focusTarget target
+
+      return false
 
     search_form.on 'submit', ( e ) ->
       e.preventDefault()

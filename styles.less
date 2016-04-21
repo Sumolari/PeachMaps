@@ -1,4 +1,6 @@
 @orange: #FF7D00;
+@darkGrey: #494949;
+@lightGrey: #7C7C7C;
 @fontFamily: 'SFNSText', 'Helvetica Neue', sans-serif;
 
 body {
@@ -55,6 +57,8 @@ body {
 				font-size: 21px;
 				font-weight: 300;
 				margin: 0;
+				z-index: 99;
+				position: relative;
 
 				&:focus {
 					outline: none;
@@ -69,6 +73,113 @@ body {
 
 			}
 
+			#hide-suggestions {
+
+			    top: 10px;
+				right: -20px;
+				position: absolute;
+				z-index: 999;
+				display: none;
+				padding: 0px 8px 3px 8px;
+				height: 24px;
+				width: 10px;
+				background: #fff;
+				border-radius: 25px;
+				text-align: center;
+				text-decoration: none;
+				color: @darkGrey;
+
+				&:hover {
+					background: #eee;
+				}
+
+			}
+
+			#search-suggestions {
+				display: none;
+				z-index: 9;
+				position: absolute;
+				top: 46px;
+				width: 100%;
+				max-height: 205px;
+				padding: 5px 10px;
+				overflow: scroll;
+
+				background: rgba(255,255,255,0.9);
+				box-shadow: 0px 0px 15px rgba(0,0,0,0.15), 0px 0px 1px 1px rgba(0,0,0,0.1);
+				border-radius: 0 0 5px 5px;
+
+				&:before, &:after {
+					content: '';
+					display: block;
+					padding: 0 30px;
+					width: 100%;
+					background: @orange;
+					height: 1px;
+					position: absolute;
+					z-index: 99;
+					top: -1px;
+					left: -15px;
+				}
+
+				&:before {
+					top: -2px;
+					background: #fff;
+				}
+
+				ul {
+
+					margin: 0;
+					padding: 0;
+					list-style: none;
+
+					li {
+
+						padding: 5px 0;
+
+						a {
+
+							display: block;
+							padding: 5px 10px;
+
+							border-radius: 5px;
+
+							color: #000;
+							text-decoration: none;
+
+							span {
+								display: block;
+
+								&.subtitle {
+									color: @lightGrey;
+								}
+
+							}
+
+							&:hover {
+
+								background: lighten(@orange, 10%);
+
+								span {
+
+									color: #fff;
+
+									&.subtitle {
+										color: #eee;
+									}
+
+								}
+
+							}
+
+						}
+
+					}
+
+				}
+
+			}
+
 		}
 
 		h1 {
@@ -77,7 +188,7 @@ body {
 			top: 0;
 			left: 0;
 
-			color: #494949;
+			color: @darkGrey;
 
 			font-family: @fontFamily;
 			font-size: 21px;
@@ -139,8 +250,7 @@ body {
 	font-weight: 300;
 	text-decoration: none;
 	text-align: center;
-	color: #494949;
+	color: @darkGrey;
 	background: rgba( 255, 255, 255, 0.8 );
-
 	box-shadow: 0px 0px 15px rgba(0,0,0,0.15), 0px 0px 1px 1px rgba(0,0,0,0.1);
 }
