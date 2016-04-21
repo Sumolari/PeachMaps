@@ -63,7 +63,7 @@ document.addEventListener 'DOMContentLoaded', (event) ->
 
       map.addAnnotation current_annotation
 
-      exportURL = "/?lat=#{target.latitude}&lon=#{target.longitude}&title=\
+      exportURL = "./?lat=#{target.latitude}&lon=#{target.longitude}&title=\
                    #{encodeURIComponent target.title}&subtitle=\
                    #{encodeURIComponent target.subtitle}"
 
