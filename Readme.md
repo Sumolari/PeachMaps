@@ -17,7 +17,7 @@ This project uses [less](http://lesscss.org/) and [CoffeeScript](http://coffeesc
 - [x] Search suggestions
 - [x] Highlight query in suggestions
 - [x] Activity indicator
-- [ ] Directions
+- [x] Directions
 - [ ] Multiple annotations / custom maps
 - [ ] Windowed application with Electron or similar
 
