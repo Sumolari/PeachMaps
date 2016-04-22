@@ -27,33 +27,29 @@
 				    autocomplete="off"
 				    placeholder="Search for a place or address" />
 				<div id="activity_indicator" data-loader="circle"></div>
-				<a id="hide-suggestions" href="#">×</a>
-				<div id="search-suggestions">
-					<ul>
-						<li><a href="#" data-latitude="" data-longitude="" data-title="" data-subtitle="">
-							<span class="title">Title</span>
-							<span class="subtitle">Subtitle</span>
-						</a></li>
-						<li><a href="#" data-latitude="" data-longitude="" data-title="" data-subtitle="">
-							<span class="title">Title</span>
-							<span class="subtitle">Subtitle</span>
-						</a></li>
-						<li><a href="#" data-latitude="" data-longitude="" data-title="" data-subtitle="">
-							<span class="title">Title</span>
-							<span class="subtitle">Subtitle</span>
-						</a></li>
-						<li><a href="#" data-latitude="" data-longitude="" data-title="" data-subtitle="">
-							<span class="title">Title</span>
-							<span class="subtitle">Subtitle</span>
-						</a></li>
-					</ul>
-				</div>
+				<a id="hide-suggestions" class="close-button" href="#">×</a>
+				<div id="search-suggestions"><ul></ul></div>
 			</div>
 			<h1>Peach <span>Maps</span></h1>
 			<p>By <a href="https://twitter.com/sumolari">@Sumolari</a> and <a href="https://twitter.com/javierrov">@JavierRoV</a></p>
 		</form>
 	</div>
+
 	<a href="#" id="permalink">Share this address</a>
+
+	<div id="directions">
+		<a id="hide-directions" class="close-button" href="#">×</a>
+		<div id="metadata">
+			<span>Start: <span id="origin">Origin</span></span>
+			<span>End: <span id="destination">Destination</span></span>
+		</div>
+		<div id="transport">
+			<a id="automobile" class="selected">Drive</a>
+			<a id="walking">Walk</a>
+		</div>
+		<div id="directions-activity-indicator" data-loader="circle"></div>
+		<ul id="available-routes"></ul>
+	</div>
 	<div id="map"></div>
 
 	<script src="https://code.jquery.com/jquery-1.12.3.min.js"

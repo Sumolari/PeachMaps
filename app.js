@@ -23,7 +23,11 @@
   })();
 
   document.addEventListener('DOMContentLoaded', function(event) {
-    var calloutDelegate, current_annotation, map, pending_update, search_engine;
+
+    /*
+    Initialize MapKit and set up Map.
+     */
+    var calloutDelegate, current_annotation, current_overlays, map, pending_update, route_destination, route_origin, router, search_engine, selected_transport;
     mapkit.init({
       apiKey: 'b2af5300a3c2ea9b5d38c782c7d2909dc88d6621',
       bootstrapUrl: './bootstrap.json'
@@ -31,9 +35,24 @@
     map = new mapkit.Map('map');
     map.showsUserLocation = false;
     map.showsUserLocationControl = true;
+
+    /*
+    Set up
+     */
+    router = new mapkit.Directions({
+      language: 'en'
+    });
+    current_overlays = [];
+    selected_transport = mapkit.Directions.Transport.Automobile;
+
+    /*
+    Object handling callout interaction.
+    At the moment it just returns a popover which is displayed on top of
+    annotation.
+     */
     calloutDelegate = {
       calloutContentForAnnotation: function(annotation) {
-        var element, subtitle, title;
+        var directions, element, subtitle, title;
         element = document.createElement('div');
         element.className = 'mk-standard';
         title = element.appendChild(document.createElement('div'));
@@ -42,23 +61,44 @@
         subtitle = element.appendChild(document.createElement('div'));
         subtitle.className = 'mk-subtitle';
         subtitle.textContent = annotation.subtitle;
+        directions = element.appendChild(document.createElement('div'));
+        directions.className = 'mk-subtitle';
+        directions.innerHTML = "Directions <a href=\"#\" id=\"origin-link\">from here</a> | <a href=\"#\" id=\"destination-link\">to here</a>.";
         return element;
       }
     };
     current_annotation = null;
     pending_update = null;
+    route_origin = null;
+    route_destination = null;
     search_engine = new mapkit.Search();
     return $('document').ready(function() {
-      var activity_indicator, focusTarget, hide_suggestions, hide_suggestions_button, initialTarget, permalink, search, search_field, search_form, search_suggestions, search_suggestions_ul, show_suggestions;
+      var activity_indicator, addOverlayForRoute, automobile_link, available_routes_container, clearOverlays, current_target, destination_span, directions_activity_indicator, directions_container, focus_target, get_directions, hide_suggestions, hide_suggestions_button, initialTarget, origin_span, permalink, search, search_field, search_form, search_suggestions, search_suggestions_ul, show_suggestions, walking_link;
+      current_target = null;
       permalink = $('#permalink');
-      focusTarget = function(target) {
-        var annotation_data, exportURL;
+
+      /*
+      Centers map on given target and adds an annotation and a popover provided
+      the proper title.
+      
+      Parameters:
+        - target Object. Should have `latitude` and `longitude` attributes.
+                         If `title` and `subtitles` attributes are present a
+                         popover will be displayed when clicking the annotation.
+       */
+      focus_target = function(target) {
+        var exportURL;
+        current_target = target;
+        permalink.hide();
+        if (current_annotation != null) {
+          map.removeAnnotation(current_annotation);
+        }
         if (!((target.title != null) && (target.subtitle != null))) {
           map.setRegionAnimated(new mapkit.CoordinateRegion(new mapkit.Coordinate(target.latitude, target.longitude), new mapkit.CoordinateSpan(0.16, 0.16)));
           return;
         }
         map.region = new mapkit.CoordinateRegion(new mapkit.Coordinate(target.latitude, target.longitude), new mapkit.CoordinateSpan(0.16, 0.16));
-        annotation_data = {
+        current_annotation = new mapkit.ImageAnnotation(new mapkit.Coordinate(target.latitude, target.longitude), {
           callout: calloutDelegate,
           title: target.title,
           subtitle: target.subtitle,
@@ -66,11 +106,7 @@
             1: "assets/greenDot.png",
             2: "assets/greenDot@2x.png"
           }
-        };
-        if (current_annotation != null) {
-          map.removeAnnotation(current_annotation);
-        }
-        current_annotation = new mapkit.ImageAnnotation(new mapkit.Coordinate(target.latitude, target.longitude), annotation_data);
+        });
         map.addAnnotation(current_annotation);
         exportURL = "?lat=" + target.latitude + "&lon=" + target.longitude + "&title=" + (encodeURIComponent(target.title)) + "&subtitle=" + (encodeURIComponent(target.subtitle));
         permalink.attr('href', exportURL);
@@ -88,28 +124,129 @@
           initialTarget.subtitle = decodeURIComponent(QueryString.subtitle);
         }
         setTimeout(function() {
-          return focusTarget(initialTarget);
+          return focus_target(initialTarget);
         }, 200);
       } else {
         initialTarget = {
           latitude: 37.782851,
           longitude: -122.409333
         };
-        focusTarget(initialTarget);
+        focus_target(initialTarget);
         permalink.hide();
       }
       hide_suggestions_button = $('#hide-suggestions');
       search_suggestions = $('#search-suggestions');
       search_suggestions_ul = $('#search-suggestions ul');
       activity_indicator = $('#activity_indicator');
+      directions_container = $('#directions');
+      available_routes_container = $('#available-routes');
+      directions_activity_indicator = $('#directions-activity-indicator');
+      automobile_link = $('#automobile');
+      walking_link = $('#walking');
+      search_field = $('#search');
+      search_form = $('#search-form');
+      origin_span = $('#origin');
+      destination_span = $('#destination');
+      clearOverlays = function() {
+        var i, len, overlay;
+        for (i = 0, len = current_overlays.length; i < len; i++) {
+          overlay = current_overlays[i];
+          map.removeOverlay(overlay);
+        }
+        return current_overlays = [];
+      };
+      addOverlayForRoute = function(route) {
+        var coordinates, i, len, path, path_overlay, results, step;
+        clearOverlays();
+        results = [];
+        for (i = 0, len = route.length; i < len; i++) {
+          path = route[i];
+          coordinates = (function() {
+            var j, len1, results1;
+            results1 = [];
+            for (j = 0, len1 = path.length; j < len1; j++) {
+              step = path[j];
+              results1.push(new mapkit.Coordinate(step.latitude, step.longitude));
+            }
+            return results1;
+          })();
+          path_overlay = new mapkit.PolylineOverlay(coordinates);
+          current_overlays.push(path_overlay);
+          results.push(map.addOverlay(path_overlay));
+        }
+        return results;
+      };
+
+      /*
+      Gets directions from origin to destination using given transport and updates
+      UI.
+      
+      Parameters:
+        - origin      mapkit.Coordinate. Origin of directions.
+        - destination mapkit.Coordinate. Destination of directions.
+        - transport   mapkit.Directions.Transport. Transport to be used.
+                      Either `mapkit.Directions.Transport.Walking` or
+                      `mapkit.Directions.Transport.Automobile`.
+                      Defaults to `mapkit.Directions.Transport.Automobile`.
+       */
+      get_directions = function(origin, destination, transport) {
+        directions_container.show();
+        if (!((origin != null) && (destination != null))) {
+          return;
+        }
+        clearOverlays();
+        directions_activity_indicator.show();
+        available_routes_container.html('');
+        return router.route({
+          origin: origin,
+          destination: destination,
+          transportType: transport
+        }, function(err, res) {
+          var i, len, path_json, results, route, route_number, routes;
+          if (err != null) {
+            return;
+          }
+          routes = res.routes;
+          directions_activity_indicator.hide();
+          route_number = 0;
+          results = [];
+          for (i = 0, len = routes.length; i < len; i++) {
+            route = routes[i];
+            route_number += 1;
+            path_json = encodeURIComponent(JSON.stringify(route.path));
+            available_routes_container.append("<li><a href=\"#\" data-route=\"" + path_json + "\">Route " + route_number + "</a></li>");
+            if (route_number === 1) {
+              results.push(addOverlayForRoute(route.path));
+            } else {
+              results.push(void 0);
+            }
+          }
+          return results;
+        });
+      };
+
+      /*
+      Hides suggestions container and close button.
+       */
       hide_suggestions = function() {
         hide_suggestions_button.hide();
         return search_suggestions.hide();
       };
+
+      /*
+      Shows suggestions container and close button.
+       */
       show_suggestions = function() {
         hide_suggestions_button.show();
         return search_suggestions.show();
       };
+
+      /*
+      Perform a search with given search term, updating UI properly.
+      
+      Parameters:
+        - search_term String. Term to search.
+       */
       search = function(search_term) {
         if (pending_update != null) {
           clearTimeout(pending_update);
@@ -145,14 +282,12 @@
                   highlighted_title = item.title.replace(findRegex, replace);
                   search_suggestions_ul.append("<li><a href=\"\#\"data-latitude=\"" + item.latitude + "\" data-longitude=\"" + item.longitude + "\" data-title=\"" + item.title + "\" data-subtitle=\"" + item.subtitle + "\"><span class=\"title\">" + highlighted_title + "</span><span class=\"subtitle\">" + item.subtitle + "</span></a></li>");
                 }
-                return focusTarget(items[0]);
+                return focus_target(items[0]);
               }, 200);
             }
           }
         });
       };
-      search_field = $('#search');
-      search_form = $('#search-form');
       hide_suggestions_button.on('click', function(e) {
         e.preventDefault;
         hide_suggestions();
@@ -168,7 +303,8 @@
           title: link.attr('data-title'),
           subtitle: link.attr('data-subtitle')
         };
-        focusTarget(target);
+        focus_target(target);
+        hide_suggestions();
         return false;
       });
       search_form.on('submit', function(e) {
@@ -176,8 +312,57 @@
         search(search_field.val());
         return false;
       });
-      return search_field.on('input', function() {
+      search_field.on('input', function() {
         return search(search_field.val());
+      });
+      $(document).on('click', '#origin-link', function(e) {
+        e.preventDefault();
+        route_origin = new mapkit.Coordinate(current_target.latitude, current_target.longitude);
+        origin_span.text(current_target.title);
+        origin_span.addClass('set');
+        get_directions(route_origin, route_destination, selected_transport);
+        return false;
+      });
+      $(document).on('click', '#destination-link', function(e) {
+        e.preventDefault();
+        route_destination = new mapkit.Coordinate(current_target.latitude, current_target.longitude);
+        destination_span.text(current_target.title);
+        destination_span.addClass('set');
+        get_directions(route_origin, route_destination, selected_transport);
+        return false;
+      });
+      $('#origin, #destination').on('click', function(e) {
+        e.preventDefault();
+        search_field.focus();
+        return false;
+      });
+      automobile_link.on('click', function(e) {
+        e.preventDefault();
+        selected_transport = mapkit.Directions.Transport.Automobile;
+        automobile_link.addClass('selected');
+        walking_link.removeClass('selected');
+        get_directions(route_origin, route_destination, selected_transport);
+        return false;
+      });
+      walking_link.on('click', function(e) {
+        e.preventDefault();
+        selected_transport = mapkit.Directions.Transport.Walking;
+        walking_link.addClass('selected');
+        automobile_link.removeClass('selected');
+        get_directions(route_origin, route_destination, selected_transport);
+        return false;
+      });
+      $('#hide-directions').on('click', function(e) {
+        e.preventDefault();
+        directions_container.hide();
+        return false;
+      });
+      return available_routes_container.on('click', 'li a', function(e) {
+        var route_selected;
+        e.preventDefault();
+        route_selected = JSON.parse(decodeURIComponent($(this).attr('data-route')));
+        addOverlayForRoute(route_selected);
+        return false;
       });
     });
   });
