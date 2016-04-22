@@ -345,27 +345,57 @@ document.addEventListener 'DOMContentLoaded', (event) ->
     search_field.on 'input', ->
       search search_field.val()
 
+    ###
+    Sets route's origin to given target.
+
+    Parameters:
+      - new_origin Target to be set as new origin.
+    ###
+    set_origin = ( new_origin ) ->
+      if new_origin?
+        route_origin = new mapkit.Coordinate(
+          new_origin.latitude,
+          new_origin.longitude
+        )
+        route_origin.title = new_origin.title
+        origin_span.text new_origin.title
+        origin_span.addClass 'set'
+      else
+        route_origin = null
+        origin_span.text 'Origin'
+        origin_span.removeClass 'set'
+
+    ###
+    Sets route's destination to given target.
+
+    Parameters:
+      - new_destination Target to be set as new destination.
+    ###
+    set_destination = ( new_destination ) ->
+      if new_destination?
+        route_destination = new mapkit.Coordinate(
+          new_destination.latitude,
+          new_destination.longitude
+        )
+        route_destination.title = new_destination.title
+        destination_span.text new_destination.title
+        destination_span.addClass 'set'
+      else
+        route_destination = null
+        destination_span.text 'Destination'
+        destination_span.removeClass 'set'
+
     # When clicking on "from here" button, set route origin.
     $( document ).on 'click', '#origin-link', ( e ) ->
       e.preventDefault()
-      route_origin = new mapkit.Coordinate(
-        current_target.latitude,
-        current_target.longitude
-      )
-      origin_span.text current_target.title
-      origin_span.addClass 'set'
+      set_origin current_target
       get_directions route_origin, route_destination, selected_transport
       return false
 
     # When clicking on "to here" button, set route origin.
     $( document ).on 'click', '#destination-link', ( e ) ->
       e.preventDefault()
-      route_destination = new mapkit.Coordinate(
-        current_target.latitude,
-        current_target.longitude
-      )
-      destination_span.text current_target.title
-      destination_span.addClass 'set'
+      set_destination current_target
       get_directions route_origin, route_destination, selected_transport
       return false
 
@@ -416,5 +446,19 @@ document.addEventListener 'DOMContentLoaded', (event) ->
       $( this ).addClass 'selected'
 
       addOverlayForRoute route_selected
+
+      return false
+
+    # Clicking on reverse button should reverse directions.
+    $( '#reverse-directions' ).on 'click', ( e ) ->
+      e.preventDefault()
+
+      prev_destination = route_destination
+      prev_origin = route_origin
+
+      set_destination prev_origin
+      set_origin prev_destination
+
+      get_directions prev_destination, prev_origin, selected_transport
 
       return false

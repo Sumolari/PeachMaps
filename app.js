@@ -73,7 +73,7 @@
     route_destination = null;
     search_engine = new mapkit.Search();
     return $('document').ready(function() {
-      var activity_indicator, addOverlayForRoute, automobile_link, available_routes_container, clearOverlays, current_target, destination_span, directions_activity_indicator, directions_container, focus_target, get_directions, hide_suggestions, hide_suggestions_button, initialTarget, map_obj, origin_span, permalink, search, search_field, search_form, search_suggestions, search_suggestions_ul, show_suggestions, walking_link;
+      var activity_indicator, addOverlayForRoute, automobile_link, available_routes_container, clearOverlays, current_target, destination_span, directions_activity_indicator, directions_container, focus_target, get_directions, hide_suggestions, hide_suggestions_button, initialTarget, map_obj, origin_span, permalink, search, search_field, search_form, search_suggestions, search_suggestions_ul, set_destination, set_origin, show_suggestions, walking_link;
       current_target = null;
       permalink = $('#permalink');
 
@@ -317,19 +317,53 @@
       search_field.on('input', function() {
         return search(search_field.val());
       });
+
+      /*
+      Sets route's origin to given target.
+      
+      Parameters:
+        - new_origin Target to be set as new origin.
+       */
+      set_origin = function(new_origin) {
+        if (new_origin != null) {
+          route_origin = new mapkit.Coordinate(new_origin.latitude, new_origin.longitude);
+          route_origin.title = new_origin.title;
+          origin_span.text(new_origin.title);
+          return origin_span.addClass('set');
+        } else {
+          route_origin = null;
+          origin_span.text('Origin');
+          return origin_span.removeClass('set');
+        }
+      };
+
+      /*
+      Sets route's destination to given target.
+      
+      Parameters:
+        - new_destination Target to be set as new destination.
+       */
+      set_destination = function(new_destination) {
+        if (new_destination != null) {
+          route_destination = new mapkit.Coordinate(new_destination.latitude, new_destination.longitude);
+          route_destination.title = new_destination.title;
+          destination_span.text(new_destination.title);
+          return destination_span.addClass('set');
+        } else {
+          route_destination = null;
+          destination_span.text('Destination');
+          return destination_span.removeClass('set');
+        }
+      };
       $(document).on('click', '#origin-link', function(e) {
         e.preventDefault();
-        route_origin = new mapkit.Coordinate(current_target.latitude, current_target.longitude);
-        origin_span.text(current_target.title);
-        origin_span.addClass('set');
+        set_origin(current_target);
         get_directions(route_origin, route_destination, selected_transport);
         return false;
       });
       $(document).on('click', '#destination-link', function(e) {
         e.preventDefault();
-        route_destination = new mapkit.Coordinate(current_target.latitude, current_target.longitude);
-        destination_span.text(current_target.title);
-        destination_span.addClass('set');
+        set_destination(current_target);
         get_directions(route_origin, route_destination, selected_transport);
         return false;
       });
@@ -360,13 +394,23 @@
         map_obj.css('left', 0);
         return false;
       });
-      return available_routes_container.on('click', 'li a', function(e) {
+      available_routes_container.on('click', 'li a', function(e) {
         var route_selected;
         e.preventDefault();
         route_selected = JSON.parse(decodeURIComponent($(this).attr('data-route')));
         $('li a.selected', available_routes_container).removeClass('selected');
         $(this).addClass('selected');
         addOverlayForRoute(route_selected);
+        return false;
+      });
+      return $('#reverse-directions').on('click', function(e) {
+        var prev_destination, prev_origin;
+        e.preventDefault();
+        prev_destination = route_destination;
+        prev_origin = route_origin;
+        set_destination(prev_origin);
+        set_origin(prev_destination);
+        get_directions(prev_destination, prev_origin, selected_transport);
         return false;
       });
     });
