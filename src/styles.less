@@ -22,6 +22,21 @@ body {
 	background-color: #EFEFEF;
 }
 
+.mk-directions {
+	padding-top: 5px;
+	border-top: 1px solid @grey;
+	margin-top: 5px;
+
+	a {
+		color: @orange;
+		text-decoration: none;
+
+		&:hover {
+			color: lighten( @orange, 10% );
+		}
+	}
+}
+
 #directions {
 	width: 100%;
 	max-width: 300px;
@@ -30,7 +45,7 @@ body {
 	left: 0;
 	position: absolute;
 	z-index: 9;
-	display: block;
+	display: none;
 	overflow: scroll;
 
 	background: rgba( 255, 255, 255, 0.8 );
@@ -149,7 +164,7 @@ body {
 			text-decoration: none;
 			background: #FFF;
 
-			&:hover {
+			&:hover, &.selected {
 				color: #FFF;
 				background: @selectedColor;
 				border-color: @selectedColor;

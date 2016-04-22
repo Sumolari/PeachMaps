@@ -62,7 +62,7 @@
         subtitle.className = 'mk-subtitle';
         subtitle.textContent = annotation.subtitle;
         directions = element.appendChild(document.createElement('div'));
-        directions.className = 'mk-subtitle';
+        directions.className = 'mk-subtitle mk-directions';
         directions.innerHTML = "Directions <a href=\"#\" id=\"origin-link\">from here</a> | <a href=\"#\" id=\"destination-link\">to here</a>.";
         return element;
       }
@@ -73,7 +73,7 @@
     route_destination = null;
     search_engine = new mapkit.Search();
     return $('document').ready(function() {
-      var activity_indicator, addOverlayForRoute, automobile_link, available_routes_container, clearOverlays, current_target, destination_span, directions_activity_indicator, directions_container, focus_target, get_directions, hide_suggestions, hide_suggestions_button, initialTarget, origin_span, permalink, search, search_field, search_form, search_suggestions, search_suggestions_ul, show_suggestions, walking_link;
+      var activity_indicator, addOverlayForRoute, automobile_link, available_routes_container, clearOverlays, current_target, destination_span, directions_activity_indicator, directions_container, focus_target, get_directions, hide_suggestions, hide_suggestions_button, initialTarget, map_obj, origin_span, permalink, search, search_field, search_form, search_suggestions, search_suggestions_ul, show_suggestions, walking_link;
       current_target = null;
       permalink = $('#permalink');
 
@@ -134,6 +134,7 @@
         focus_target(initialTarget);
         permalink.hide();
       }
+      map_obj = $('#map');
       hide_suggestions_button = $('#hide-suggestions');
       search_suggestions = $('#search-suggestions');
       search_suggestions_ul = $('#search-suggestions ul');
@@ -191,6 +192,7 @@
        */
       get_directions = function(origin, destination, transport) {
         directions_container.show();
+        map_obj.css('left', directions_container.width());
         if (!((origin != null) && (destination != null))) {
           return;
         }
@@ -214,7 +216,7 @@
             route = routes[i];
             route_number += 1;
             path_json = encodeURIComponent(JSON.stringify(route.path));
-            available_routes_container.append("<li><a href=\"#\" data-route=\"" + path_json + "\">Route " + route_number + "</a></li>");
+            available_routes_container.append("<li><a " + (route_number === 1 ? "class=\"selected\"" : void 0) + " href=\"#\" data-route=\"" + path_json + "\">Route " + route_number + "</a></li>");
             if (route_number === 1) {
               results.push(addOverlayForRoute(route.path));
             } else {
@@ -355,12 +357,15 @@
       $('#hide-directions').on('click', function(e) {
         e.preventDefault();
         directions_container.hide();
+        map_obj.css('left', 0);
         return false;
       });
       return available_routes_container.on('click', 'li a', function(e) {
         var route_selected;
         e.preventDefault();
         route_selected = JSON.parse(decodeURIComponent($(this).attr('data-route')));
+        $('li a.selected', available_routes_container).removeClass('selected');
+        $(this).addClass('selected');
         addOverlayForRoute(route_selected);
         return false;
       });

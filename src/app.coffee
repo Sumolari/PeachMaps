@@ -57,7 +57,7 @@ document.addEventListener 'DOMContentLoaded', (event) ->
       subtitle.textContent = annotation.subtitle
 
       directions = element.appendChild document.createElement 'div'
-      directions.className = 'mk-subtitle'
+      directions.className = 'mk-subtitle mk-directions'
       directions.innerHTML = "Directions
         <a href=\"#\" id=\"origin-link\">from here</a> |
         <a href=\"#\" id=\"destination-link\">to here</a>."
@@ -162,6 +162,7 @@ document.addEventListener 'DOMContentLoaded', (event) ->
 
       permalink.hide()
 
+    map_obj = $ '#map'
     hide_suggestions_button = $ '#hide-suggestions'
     search_suggestions = $ '#search-suggestions'
     search_suggestions_ul = $ '#search-suggestions ul'
@@ -213,6 +214,7 @@ document.addEventListener 'DOMContentLoaded', (event) ->
     ) ->
 
       directions_container.show()
+      map_obj.css 'left', directions_container.width()
 
       return unless origin? and destination?
 
@@ -237,7 +239,8 @@ document.addEventListener 'DOMContentLoaded', (event) ->
 
             path_json = encodeURIComponent JSON.stringify route.path
             available_routes_container.append "<li>\
-              <a href=\"#\" data-route=\"#{path_json}\">Route
+              <a #{ if route_number is 1 then "class=\"selected\"" }
+              href=\"#\" data-route=\"#{path_json}\">Route
               #{route_number}</a></li>"
 
             addOverlayForRoute route.path if route_number is 1
@@ -400,6 +403,7 @@ document.addEventListener 'DOMContentLoaded', (event) ->
     $( '#hide-directions' ).on 'click', ( e ) ->
       e.preventDefault()
       directions_container.hide()
+      map_obj.css 'left', 0
       return false
 
     # When clicking on a route link, load that route.
@@ -407,6 +411,9 @@ document.addEventListener 'DOMContentLoaded', (event) ->
       e.preventDefault()
 
       route_selected = JSON.parse decodeURIComponent $( this ).attr 'data-route'
+
+      $( 'li a.selected', available_routes_container ).removeClass 'selected'
+      $( this ).addClass 'selected'
 
       addOverlayForRoute route_selected
 
